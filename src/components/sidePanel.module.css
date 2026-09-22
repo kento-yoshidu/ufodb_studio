@@ -29,3 +29,14 @@
   gap: 8px;
   flex-wrap: nowrap;
 }
+
+.row input,
+.detailsContent input {
+  flex: 1;
+  min-width: 0;
+}
+
+.row button,
+.detailsContent button {
+  flex-shrink: 0;
+}

@@ -46,6 +46,10 @@ export default function Contents() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    invoke<string[][]>("groups").then(setGroups);
+  }, []);
+
   return (
     <div className={styles.wrapper}>
       <Header
