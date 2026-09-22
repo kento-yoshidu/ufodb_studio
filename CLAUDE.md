@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `ufodb_v0`とは別プロセスにしない。`src-tauri/Cargo.toml`で`ufodb_v0`をpath依存（`../../`）として追加し、TauriのRustバックエンドから`ufodb_v0::Ufdb`を直接呼び出す
 - `ufodb_v0`本体の実装（コア機能・公開API）はこのリポジトリでは行わない。GUI側で必要になった公開APIが`ufodb_v0`に無い場合は、`ufodb_v0`側リポジトリで追加してもらう
-- 永続化はしない。`ufodb_v0`がv0（オンメモリのみ）である間は、プロセスを閉じればデータが消える前提でよい
+- 永続化する。`ufodb_v0::storage`（CLI側のSAVE/LOADと同じ実装）をGUI側からも呼び出し、CLIと同じ保存データ(`./ufo_data/`配下)を共有する。ただし`storage`の保存先は現状カレントディレクトリ基準の相対パスなので、CLIとGUIで起動元（カレントディレクトリ）が異なると別ファイルを参照してしまう問題がある。これは`ufodb_v0`側でパス解決をcwd非依存にする対応が入るまでの既知の制約
 
 実装計画・進捗のフェーズ分けは`docs/ROADMAP.md`を参照。
 

@@ -43,8 +43,24 @@ fn groups(state: tauri::State<Mutex<ufodb_v0::Ufdb>>) -> Vec<Vec<String>> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let data_dir = match ufodb_v0::storage::data_dir() {
+        Ok(dir) => dir,
+        Err(e) => panic!("データディレクトリを特定できませんでした: {e}"),
+    };
+
+    let ufdb = match ufodb_v0::storage::load("ufdb", &data_dir) {
+        Ok(Some(ufdb)) => ufdb,
+        Ok(None) => ufodb_v0::Ufdb::new(),
+        Err(e) => {
+            eprintln!("failed to load ufdb: {e}");
+            ufodb_v0::Ufdb::new()
+        }
+    };
+
+    println!("{:?}", ufdb);
+
     tauri::Builder::default()
-        .manage(Mutex::new(ufodb_v0::Ufdb::new()))
+        .manage(Mutex::new(ufdb))
         // .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             greet,

@@ -6,7 +6,7 @@
 
 - `ufodb_v0`とは別プロセスにしない。TauriのRustバックエンド内で`ufodb_v0::Ufdb`(将来的には`ufodb_v0::db::Db`)を直接呼び出す。CLIの`cargo run`とデータを共有する必要はない(詳細は`ufodb_v0`側`docs/ROADMAP.md`の「GUI(Tauri、別リポジトリ)との連携メモ」を参照)
 - `ufodb_v0`本体の実装はこのリポジトリでは行わない。GUI側で必要になった公開APIが`ufodb_v0`に無い場合は、そちらのリポジトリ側で追加してもらう(Phase 4参照)
-- 永続化はしない。`ufodb_v0`がv0(オンメモリのみ)である間は、このGUIもプロセスを閉じればデータが消える前提でよい
+- 永続化する。`ufodb_v0::storage`(CLI側のSAVE/LOADと同じ実装)をGUI側からも呼び出し、CLIと同じ保存データ(`./ufo_data/`配下)を共有する方針に変更した(詳細はPhase 5参照)
 
 ## Phase 0: プロジェクト初期化
 - [x] `npm create tauri-app`でReact + TypeScript + Vite構成のTauriプロジェクトを作成
@@ -46,6 +46,13 @@
 - [ ] ノードをクリックしたら、そのキーを起点に`same`/`size`などを呼べるようにする、といったインタラクション（詳細は実装時に検討）
 - [ ] 大規模グループの扱い（`ufodb_v0`側ROADMAP Phase 11と同様、閾値を超えたグループはレイアウト計算を諦めて簡易表示にする）をどこまでこちらでも踏襲するかは、実際に大きいデータで試してから決める
 
+## Phase 5: 永続化対応（SAVE/LOAD）
+`ufodb_v0`側で永続化（Phase 12、`ufodb_v0::storage`として`pub mod storage;`済み）が実装されたのを受けて、GUI側もCLIと同じ保存データを扱えるようにする。
+
+- [ ] **前提となるブロッカー**: `ufodb_v0::storage`の保存先(`./ufo_data/{db_name}.json`)はカレントディレクトリ基準の相対パス。CLI(`ufodb`リポジトリ直下で起動)とGUI(`tauri-scratch/src-tauri`から起動されることが多い)では起動元が異なるため、同じ相対パスでも別のファイルを見てしまう。`ufodb_v0`側でcwdに依存しない保存先解決に直してもらう必要がある（このリポジトリでは対応しない）
+- [ ] `save`コマンド: `ufodb_v0::storage::save(&ufdb, db_name)`を呼ぶTauriコマンドを追加。`io::Error`は`Serialize`を実装していないため、戻り値は`Result<(), String>`等に変換する
+- [ ] 起動時のロード: `run()`内で`Mutex::new(ufodb_v0::Ufdb::new())`の代わりに、`ufodb_v0::storage::load(db_name)`の結果があればそれを使う形に変更する
+- [ ] `db_name`の扱い: 現状GUIは`Db`層（複数DB対応、Phase 3）を持たず単一の`Ufdb`のみのため、`db_name`は当面決め打ち文字列（CLIのデフォルト`"ufdb"`と合わせる）にする。Phase 3実装後は選択中のDB名と連動させる
+
 ## 検討事項（未定）
 - CLIプロセスと生きたデータを共有したくなった場合の話（TCPサーバー化）は`ufodb_v0`側ROADMAP.mdの「検討事項: TCPサーバー化」を参照。現時点では着手予定なし
-- `ufodb_v0`がv1（永続化対応）に進んだ場合、このGUIから永続化されたDBをどう開く／保存するかは、v1リポジトリが立ち上がってから考える
