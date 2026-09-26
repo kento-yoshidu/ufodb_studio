@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    tauri_scratch_lib::run()
+    ufodb_studio_lib::run()
 }

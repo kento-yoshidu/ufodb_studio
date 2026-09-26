@@ -2,7 +2,7 @@
 
 UFO Studio（このリポジトリ）をビルドして、インストーラーとして配布するまでの手順。現状はWindows向けの個人配布を前提にしている。インストーラーはGitHub Releasesに置き、GitHub Pagesの配布ページからリンクする（「配布の構成」を参照）。
 
-> この手順はまだ一度も通しで実行していない。初回リリース時に実際の成果物名・所要時間などを確認して更新すること。
+> 2026-09-26にWindowsでビルド〜インストールまで確認済み（手順6の配布は未実施）。
 
 ## 前提
 
@@ -16,11 +16,11 @@ UFO Studio（このリポジトリ）をビルドして、インストーラー�
 
 | キー | 現在の値 | 用途・注意 |
 |---|---|---|
-| `productName` | `ufodb_studio` | インストーラーのファイル名、インストール先フォルダ名、スタートメニューの表示名になる。スペースを含む表示用の名前（例: `UFO Studio`）にもできる |
-| `app.windows[0].title` | `ufodb_studio` | ウィンドウのタイトルバー |
-| `identifier` | `com.toriwatari.ufodb_studio` | **一度配布したら変えない**。インストーラーのアップグレード判定（同じアプリかどうか）や、Tauri側のアプリデータの保存先の決定に使われる。変えると別アプリ扱いになる。使える文字は英数字・ハイフン・ピリオドのみ（macOSのバンドルIDでは`_`が使えない）なので、現在の値は`ufodb-studio`のように直す必要がある |
+| `productName` | `UFODB Studio` | インストーラーのファイル名、インストール先フォルダ名、スタートメニューの表示名になる |
+| `app.windows[0].title` | `UFODB Studio` | ウィンドウのタイトルバー |
+| `identifier` | `com.toriwatari.ufodb-studio` | **一度配布したら変えない**。インストーラーのアップグレード判定（同じアプリかどうか）や、Tauri側のアプリデータの保存先の決定に使われる。変えると別アプリ扱いになる。使える文字は英数字・ハイフン・ピリオドのみ（macOSのバンドルIDでは`_`が使えない） |
 
-- [ ] `identifier`を確定する
+- [x] `identifier`を確定する
 
 ## 毎回のリリース手順
 
@@ -47,8 +47,12 @@ git -C ../ufodb log -1 --oneline
 
 ```sh
 pnpm install
+pnpm lint    # 任意。未使用の変数などを警告として確認する
+pnpm build   # 先に型チェック（tsc）が通るか確認する
 pnpm tauri build
 ```
+
+開発中の`pnpm tauri dev`はViteの開発サーバーを動かすだけで`tsc`を実行しないため、型エラーがあっても気づかない。`pnpm tauri build`は型エラーがあると途中で止まるので、先に`pnpm build`で確認しておくと早い。
 
 `beforeBuildCommand`（`pnpm build` = `tsc && vite build`）が先に走ってフロントエンドが`dist/`にビルドされ、Rust側のリリースビルドの後、インストーラーが作られる。
 
@@ -56,8 +60,10 @@ pnpm tauri build
 
 `bundle.targets`が`"all"`なので、Windowsでは次の2種類が作られる。
 
-- `src-tauri/target/release/bundle/nsis/<productName>_<version>_x64-setup.exe`（NSISのインストーラー）
-- `src-tauri/target/release/bundle/msi/<productName>_<version>_x64_en-US.msi`（WiXのインストーラー）
+- `src-tauri/target/release/bundle/nsis/<productName>_<version>_x64-setup.exe`（NSISのインストーラー。v0.1.0で約1.9MB）
+- `src-tauri/target/release/bundle/msi/<productName>_<version>_x64_en-US.msi`（WiXのインストーラー。v0.1.0で約2.8MB）
+
+`productName`が`UFODB Studio`なので、ファイル名は`UFODB Studio_0.1.0_x64-setup.exe`のようにスペースを含む。
 
 配布するのはどちらか一方でよい。個人向けに配るなら`setup.exe`（NSIS）が扱いやすい。どちらか一方だけ作りたい場合は`pnpm tauri build --bundles nsis`のように指定する。
 
@@ -116,7 +122,7 @@ https://github.com/kento-yoshidu/ufodb_studio/releases/latest/download/<ファ�
 
 候補は次の2つ。
 
-- **Playground（`ufo-playground`）のPagesに同居させる**（例: `/download`）。「ブラウザでPlaygroundを試す → 気に入ったらStudioをダウンロード」という流れにでき、`ufo-design-system`のコンポーネントもそのまま使える
+- **Playground（`ufodb-playground`）のPagesに同居させる**（例: `/download`）。「ブラウザでPlaygroundを試す → 気に入ったらStudioをダウンロード」という流れにでき、`ufodb-design-system`のコンポーネントもそのまま使える
 - **配布ページ専用のリポジトリを作る**、またはこのリポジトリのPagesで公開する
 
 どちらの場合も、次の点に注意する。

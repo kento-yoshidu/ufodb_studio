@@ -29,4 +29,8 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  resolve: {
+    // reactとreact-domはDesignSystemではなくStudio側のものを使用
+    dedupe: ["react", "react-dom"],
+  },
 }));

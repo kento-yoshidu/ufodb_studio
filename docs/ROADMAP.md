@@ -1,4 +1,4 @@
-# toy_ufdb_gui_app ロードマップ
+# UFO Studio（ufodb_studio）ロードマップ
 
 `ufodb_v0`(オンメモリUnion-Find DB、別リポジトリ)をCargo依存として直接embedするTauriアプリ。GUIからUFQL相当の操作を行えるようにする。Tauri自体の学習も兼ねているため、まずは単一プロセス・単一DBの範囲で進める。
 
@@ -10,7 +10,7 @@
 
 ## Phase 0: プロジェクト初期化
 - [x] `npm create tauri-app`でReact + TypeScript + Vite構成のTauriプロジェクトを作成
-- [x] 独立したgitリポジトリとして管理し、`toy_ufdb_gui_app`にリモートを設定
+- [x] 独立したgitリポジトリとして管理し、`toy_ufdb_gui_app`にリモートを設定（のちに`ufodb_studio`へリネーム）
 - [x] `ufodb_v0`をCargo依存として`src-tauri/Cargo.toml`にpath指定で追加(`{ path = "../../" }`)
 
 ## Phase 1: 疎通確認
@@ -28,6 +28,22 @@
 - [ ] `unmerge`(UNMERGE相当): 2つのキーの辺を取り消すフォーム
 - [ ] `seed`(SEED相当): 固定ダミーデータを投入するボタン。CLI版にある「既存データがある場合の確認」をGUIでどう表現するか（確認ダイアログ／単純に上書きなど）は実装時に決める
 - 設計判断ポイント（実装しながら決める）: 各操作のたびに`groups`を呼び直して全体を再取得する今のやり方は、キー数が増えると無駄が大きくなる可能性がある。差分更新にするか、しばらくはシンプルさ優先で全件再取得のままにするかは、実際にもたつきを感じてから検討する
+
+## UI共通化（`ufodb-design-system`の導入）
+UFO Playground（WASM版）と同じUIにするため、`src/components/`のコンポーネントを`ufodb-design-system`（`../design_system`）に移し、そこから読み込む形にする。Phase 2と並行して進める。進め方の全体は`ufodb-design-system`側の`docs/ROADMAP.md`を参照。
+
+まずテスト用のダミーコンポーネントで、別リポジトリのパッケージを読み込む仕組みが動くかだけを確認する。Studioはすでに動いているので、変わるのはUIの読み込み元だけになり、問題が出たときに原因を絞り込みやすい（Playgroundより先にStudioで確認する）。
+
+- [x] `package.json`で`ufodb-design-system`を`link:../design_system`で参照する
+- [x] `vite.config.ts`に`resolve.dedupe: ["react", "react-dom"]`を入れる。`link:`で参照すると、ライブラリ内の`import "react"`が`design_system/node_modules/react`を読みにいき、Reactが二重に読み込まれることがある
+- [x] `import "ufodb-design-system/style.css"`を入れる（`src/main.tsx`）
+- [x] ダミーコンポーネントを画面のどこかに仮置きし、確認する（`src/App.tsx`）:
+  - [x] `pnpm tauri dev`で表示され、ボタンを押すと数字が増える（hooksが動く = Reactが1つだけ読み込まれている）
+  - [x] CSS Modulesのスタイルと、CSS変数（デザイントークン）が効いている
+  - [ ] エディタでpropsの型補完が効く
+  - [x] `pnpm tauri build`でも同じように表示される（ビルドしたインストーラーでWindowsにインストールし、`useState`の動作も含めて確認済み）
+- [ ] 確認が済んだらダミーコンポーネントを外し、`ufodb-design-system`に移したものから順に差し替える（`Header` → グループ一覧 → `SidePanel`）。差し替えたコンポーネントは`src/components/`から削除する（切り出し後は`ufodb-design-system`側を正とする）
+- [ ] `Contents.tsx`は`invoke()`の呼び出しと画面の組み立てが混ざっているので、`invoke()`の呼び出し（状態管理）だけをStudio側に残し、見た目は共有コンポーネントを並べるだけの形にする
 
 ## Phase 3: 複数DB対応（`Db`層への切り替え）
 `ufodb_v0`本体はPhase 5で`Ufdb`を`Db`（`HashMap<String, Ufdb>` + `current_db`）でラップする2層構成にしている。GUI側もこれに合わせて`CREATEDB`/`USE`相当の操作を追加する。

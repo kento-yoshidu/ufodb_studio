@@ -10,12 +10,6 @@ export default function Contents() {
   const [keyA, setKeyA] = useState("");
   const [keyB, setKeyB] = useState("");
 
-  async function hello() {
-    const res = await invoke("health");
-
-    console.log("res = ", res);
-  }
-
   async function insert() {
     const res = await invoke("make_set", { key });
 
