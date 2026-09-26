@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "tauri-scratch",
+  "productName": "ufodb_studio",
   "version": "0.1.0",
-  "identifier": "com.toriw.tauri-scratch",
+  "identifier": "com.toriwatari.ufodb_studio",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "tauri-scratch",
+        "title": "ufodb_studio",
         "width": 800,
         "height": 600
       }

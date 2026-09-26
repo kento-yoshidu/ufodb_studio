@@ -3606,18 +3606,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tauri-scratch"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-opener",
- "ufodb_v0",
-]
-
-[[package]]
 name = "tauri-utils"
 version = "2.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4067,6 +4055,18 @@ dependencies = [
  "memoffset",
  "tempfile",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "ufodb_studio"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-opener",
+ "ufodb_v0",
 ]
 
 [[package]]
