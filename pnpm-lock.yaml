@@ -20,6 +20,9 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.2.8(react@19.2.8)
+      ufodb-design-system:
+        specifier: link:..\design_system
+        version: link:../design_system
     devDependencies:
       '@eslint/js':
         specifier: ^10.0.1

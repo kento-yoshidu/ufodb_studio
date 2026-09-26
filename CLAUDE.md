@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-`toy_ufdb_gui_app`（このリポジトリ、ディレクトリ名は`tauri-scratch`）: `ufodb_v0`（オンメモリUnion-Find DB、別リポジトリ）をGUIから操作するためのTauri + React + TypeScriptアプリ。Tauri自体の学習も兼ねている。
+`ufodb_studio`（UFO Studio。このリポジトリ、旧称`toy_ufdb_gui_app`／`tauri-scratch`）: `ufodb_v0`（オンメモリUnion-Find DB、別リポジトリ）をGUIから操作するためのTauri + React + TypeScriptアプリ。Tauri自体の学習も兼ねている。
 
 - `ufodb_v0`とは別プロセスにしない。`src-tauri/Cargo.toml`で`ufodb_v0`をpath依存（`../../`）として追加し、TauriのRustバックエンドから`ufodb_v0::Ufdb`を直接呼び出す
 - `ufodb_v0`本体の実装（コア機能・公開API）はこのリポジトリでは行わない。GUI側で必要になった公開APIが`ufodb_v0`に無い場合は、`ufodb_v0`側リポジトリで追加してもらう
@@ -32,6 +32,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 関連リポジトリ
 
 - `ufodb_v0`本体（オンメモリUnion-Find DB本体、CLI/REPL）はこのリポジトリの親ディレクトリ（`../../`）にあり、path依存で参照している。コア実装やCLI仕様の変更はそちら側の作業
+- `ufodb-design-system`（`../design_system`）: UFO Playground（WASM版）と共有するReactコンポーネントとデザイントークン。`src/components/`のコンポーネントは順次そちらへ移す（`docs/ROADMAP.md`の「UI共通化」）。移した後のUIの変更は`ufodb-design-system`側で行う
+  - 取り込み方: `package.json`で`link:../design_system`として参照し（ビルド済みの`dist/`を読む。design_system側で`pnpm build`し直せば再インストールなしで反映される）、`src/main.tsx`で`import "ufodb-design-system/style.css"`を1回だけ読み込む。`vite.config.ts`の`resolve.dedupe: ["react", "react-dom"]`は、`link:`先の`design_system/node_modules/react`が読まれてReactが二重になり、hooksがエラーになるのを防ぐためのもの。外さないこと
 
 ## 作業の進め方
 

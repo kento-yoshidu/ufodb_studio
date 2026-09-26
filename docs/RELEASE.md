@@ -122,7 +122,7 @@ https://github.com/kento-yoshidu/ufodb_studio/releases/latest/download/<ファ�
 
 候補は次の2つ。
 
-- **Playground（`ufo-playground`）のPagesに同居させる**（例: `/download`）。「ブラウザでPlaygroundを試す → 気に入ったらStudioをダウンロード」という流れにでき、`ufo-design-system`のコンポーネントもそのまま使える
+- **Playground（`ufodb-playground`）のPagesに同居させる**（例: `/download`）。「ブラウザでPlaygroundを試す → 気に入ったらStudioをダウンロード」という流れにでき、`ufodb-design-system`のコンポーネントもそのまま使える
 - **配布ページ専用のリポジトリを作る**、またはこのリポジトリのPagesで公開する
 
 どちらの場合も、次の点に注意する。
