@@ -17,6 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pnpm dev` — Viteのフロントエンド単体を起動（ポート1420固定）
 - `pnpm tauri dev` — Tauriアプリとして起動（Rustバックエンド + フロントエンド）
 - `pnpm build` — `tsc && vite build`（フロントエンドのビルド）
+- `pnpm lint` — ESLint（`eslint.config.js`）。未使用の変数・引数は`tsc`ではなくここで警告として出す（`tsconfig.json`の`noUnusedLocals`/`noUnusedParameters`は無効化している）
 - `pnpm tauri build` — Tauriアプリのビルド
 - `cargo build` / `cargo test`（`src-tauri/`内で実行、または`cargo build --manifest-path src-tauri/Cargo.toml`）
 
