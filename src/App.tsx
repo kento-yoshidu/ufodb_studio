@@ -1,15 +1,8 @@
-import { Dummy } from "ufodb-design-system";
-import "./App.css";
 import Contents from "./components/Contents";
+import "./App.css";
 
 function App() {
-  return (
-    <>
-      <Dummy label="test" />
-
-      <Contents />
-    </>
-  );
+  return <Contents />;
 }
 
 export default App;

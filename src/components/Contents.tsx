@@ -1,26 +1,24 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import SidePanel from "./SidePanel";
 import styles from "./cotents.module.css";
-import { Header } from "ufodb-design-system";
+import { Header, InsertKeyForm, MergeForm, SidePanel } from "ufodb-design-system";
 
 export default function Contents() {
-  const [key, setKey] = useState("");
-
-  const [keyA, setKeyA] = useState("");
-  const [keyB, setKeyB] = useState("");
-
-  async function insert() {
+  async function handleInsertKey(key: string) {
     const res = await invoke("make_set", { key });
+
+    console.log("insert res = ", res);
 
     setGroups(await invoke<string[][]>("groups"));
   }
 
-  const handleMerge = async () => {
+  const handleMerge = async (keyA: string, keyB: string) => {
     const res = await invoke("unite", {
       keyA,
       keyB,
     });
+
+    console.log("merge res = ", res);
 
     setGroups(await invoke<string[][]>("groups"));
   };
@@ -54,15 +52,15 @@ export default function Contents() {
       <main className={styles.main}>
         <SidePanel
           isOpen={isSidebarOpen}
-          keyValue={key}
-          setKey={setKey}
-          keyA={keyA}
-          setKeyA={setKeyA}
-          keyB={keyB}
-          setKeyB={setKeyB}
-          insert={insert}
-          handleMerge={handleMerge}
-        />
+        >
+          <InsertKeyForm
+            onSubmit={handleInsertKey}
+          />
+
+          <MergeForm
+            onSubmit={handleMerge}
+          />
+        </SidePanel>
 
         <div className="main">
           <section className="panel">
