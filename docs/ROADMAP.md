@@ -44,6 +44,9 @@ UFO Playground（WASM版）と同じUIにするため、`src/components/`のコ�
   - [x] `pnpm tauri build`でも同じように表示される（ビルドしたインストーラーでWindowsにインストールし、`useState`の動作も含めて確認済み）
 - [ ] 確認が済んだらダミーコンポーネントを外し、`ufodb-design-system`に移したものから順に差し替える（`Header` → グループ一覧 → `SidePanel`）。差し替えたコンポーネントは`src/components/`から削除する（切り出し後は`ufodb-design-system`側を正とする）
 - [ ] `Contents.tsx`は`invoke()`の呼び出しと画面の組み立てが混ざっているので、`invoke()`の呼び出し（状態管理）だけをStudio側に残し、見た目は共有コンポーネントを並べるだけの形にする
+- [ ] テーマをダーク固定にする（ライト/ダークの切り替えはしない。方針の詳細は`ufodb-design-system`側`docs/ROADMAP.md`のPhase 2「デザイントークンとグローバルなスタイル」）。`src/App.css`のトークンを`ufodb-design-system`へ移せば、CSS側（`:root`のダークの値・`color-scheme: dark`）はそちらで入る。Studio側で行うのは次の2つ:
+  - `src-tauri/tauri.conf.json`の`app.windows[0]`に`backgroundColor`（`--bg`と同じ色）を指定する。WebViewはCSSが読み込まれるまで白いので、指定しないと起動直後に白くちらつく
+  - 同じく`"theme": "Dark"`を指定する。WindowsのタイトルバーはOSのテーマに従うため、OSがライトモードだとタイトルバーだけ白くなる
 
 ## Phase 3: 複数DB対応（`Db`層への切り替え）
 `ufodb_v0`本体はPhase 5で`Ufdb`を`Db`（`HashMap<String, Ufdb>` + `current_db`）でラップする2層構成にしている。GUI側もこれに合わせて`CREATEDB`/`USE`相当の操作を追加する。

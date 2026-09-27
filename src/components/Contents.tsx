@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import Header from "./Headet";
 import SidePanel from "./SidePanel";
 import styles from "./cotents.module.css";
+import { Header } from "ufodb-design-system";
 
 export default function Contents() {
   const [key, setKey] = useState("");
