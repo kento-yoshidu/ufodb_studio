@@ -1,22 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import Header from "./Headet";
-import SidePanel from "./SidePanel";
+import { Groups, Header, InsertKeyForm, MergeForm, SidePanel } from "ufodb-design-system";
 import styles from "./cotents.module.css";
 
 export default function Contents() {
-  const [key, setKey] = useState("");
-
-  const [keyA, setKeyA] = useState("");
-  const [keyB, setKeyB] = useState("");
-
-  async function insert() {
+  async function handleInsertKey(key: string) {
     const res = await invoke("make_set", { key });
 
     setGroups(await invoke<string[][]>("groups"));
   }
 
-  const handleMerge = async () => {
+  const handleMerge = async (keyA: string, keyB: string) => {
     const res = await invoke("unite", {
       keyA,
       keyB,
@@ -54,28 +48,24 @@ export default function Contents() {
       <main className={styles.main}>
         <SidePanel
           isOpen={isSidebarOpen}
-          keyValue={key}
-          setKey={setKey}
-          keyA={keyA}
-          setKeyA={setKeyA}
-          keyB={keyB}
-          setKeyB={setKeyB}
-          insert={insert}
-          handleMerge={handleMerge}
-        />
+        >
+          <InsertKeyForm
+            onSubmit={handleInsertKey}
+          />
 
-        <div className="main">
-          <section className="panel">
+          <MergeForm
+            onSubmit={handleMerge}
+          />
+        </SidePanel>
+
+        <div className={styles.right}>
+          <>
             {groups.length === 0 ? (
               <p className="groups__empty">まだグループがありません</p>
             ) : (
-              <ul className="groups">
-                {groups.map((group, i) => (
-                  <li key={i} className="groups__item">{group.join(", ")}</li>
-                ))}
-              </ul>
+              <Groups groups={groups} />
             )}
-          </section>
+          </>
         </div>
       </main>
     </div>
