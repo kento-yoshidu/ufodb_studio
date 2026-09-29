@@ -5,4 +5,8 @@
 .main {
   display: flex;
   padding: 24px;
+
+  .right {
+    padding: 24px;
+  }
 }
