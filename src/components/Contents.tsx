@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Groups, Header, InsertKeyForm, MergeForm, SidePanel } from "ufodb-design-system";
 import styles from "./cotents.module.css";
+import SameForm from "./SameForm";
 
 export default function Contents() {
   async function handleInsertKey(key: string) {
@@ -18,6 +19,15 @@ export default function Contents() {
 
     setGroups(await invoke<string[][]>("groups"));
   };
+
+  const handleSame = async (keyA: string, keyB: string) => {
+    const res = await invoke("same", {
+      keyA,
+      keyB,
+    });
+
+    window.alert(res);
+  }
 
   const [groups, setGroups] = useState<string[][]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -54,7 +64,12 @@ export default function Contents() {
           />
 
           <MergeForm
+            options={groups}
             onSubmit={handleMerge}
+          />
+
+          <SameForm
+            onSubmit={handleSame}
           />
         </SidePanel>
 
