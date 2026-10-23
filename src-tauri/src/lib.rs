@@ -23,6 +23,12 @@ fn unite(key_a: String, key_b: String, state: tauri::State<Mutex<ufodb_v0::Ufdb>
 }
 
 #[tauri::command]
+fn same(key_a: String, key_b: String, state: tauri::State<Mutex<ufodb_v0::Ufdb>>) -> bool {
+    let mut ufdb = state.lock().unwrap();
+    ufdb.same(&key_a, &key_b)
+}
+
+#[tauri::command]
 fn groups(state: tauri::State<Mutex<ufodb_v0::Ufdb>>) -> Vec<Vec<String>> {
     let mut ufdb = state.lock().unwrap();
 
@@ -67,6 +73,7 @@ pub fn run() {
             health,
             make_set,
             unite,
+            same,
             groups])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
