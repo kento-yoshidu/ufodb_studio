@@ -1,31 +1,27 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Groups, Header, InsertKeyForm, MergeForm, SidePanel } from "ufodb-design-system";
+import { Button, Groups, Header, InsertKeyForm, MergeForm, SidePanel } from "ufodb-design-system";
 import styles from "./cotents.module.css";
 import SameForm from "./SameForm";
-
-type GraphData = {
-  nodes: string[];
-  edges: {
-    source: string;
-    target: string;
-  }[];
-};
+import { GraphData } from "../type";
+import Graph from "./Graph";
 
 export default function Contents() {
   const [mode, setMode] = useState<"row" | "graph">("row");
+  const [graphData, setGraphData] = useState<GraphData>({
+    nodes: [],
+    edges: [],
+  });
+
+  const fetchGraph = async () => {
+    setGraphData(await invoke<GraphData>("graph"));
+  };
 
   async function handleInsertKey(key: string) {
     const res = await invoke("make_set", { key });
 
     setGroups(await invoke<string[][]>("groups"));
   }
-
-  const graph = async () => {
-    const res = await invoke<GraphData>("graph");
-
-    console.log("res = ", res);
-  };
 
   const handleMerge = async (keyA: string, keyB: string) => {
     const res = await invoke("unite", {
@@ -62,7 +58,7 @@ export default function Contents() {
 
   useEffect(() => {
     invoke<string[][]>("groups").then(setGroups);
-    graph();
+    invoke<GraphData>("graph").then(setGraphData);
   }, []);
 
   return (
@@ -90,19 +86,22 @@ export default function Contents() {
           />
         </SidePanel>
 
-        {mode === "row" ? (
-          <div className={styles.right}>
-            <>
-              {groups.length === 0 ? (
-                <p className="groups__empty">まだグループがありません</p>
-              ) : (
-                <Groups groups={groups} />
-              )}
-            </>
-          </div>
+        <div className={styles.right}>
+          <Button
+            text={mode === "row" ? "graph表示に切り替え" : "row表示に切り替え"}
+            onClick={() => setMode((m) => (m === "row" ? "graph" : "row"))}
+          />
+
+          {mode === "row" ? (
+            groups.length === 0 ? (
+              <p className="groups__empty">まだグループがありません</p>
+            ) : (
+              <Groups groups={groups} />
+            )
           ) : (
-            <p>graph</p>
+            <Graph graph={graphData} />
           )}
+        </div>
       </main>
     </div>
   );
