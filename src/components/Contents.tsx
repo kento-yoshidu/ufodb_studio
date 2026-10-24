@@ -13,14 +13,10 @@ export default function Contents() {
     edges: [],
   });
 
-  const fetchGraph = async () => {
-    setGraphData(await invoke<GraphData>("graph"));
-  };
-
   async function handleInsertKey(key: string) {
     const res = await invoke("make_set", { key });
 
-    setGroups(await invoke<string[][]>("groups"));
+    await refresh();
   }
 
   const handleMerge = async (keyA: string, keyB: string) => {
@@ -29,7 +25,7 @@ export default function Contents() {
       keyB,
     });
 
-    setGroups(await invoke<string[][]>("groups"));
+    await refresh();
   };
 
   const handleSame = async (keyA: string, keyB: string) => {
@@ -60,6 +56,11 @@ export default function Contents() {
     invoke<string[][]>("groups").then(setGroups);
     invoke<GraphData>("graph").then(setGraphData);
   }, []);
+
+  const refresh = async () => {
+    setGroups(await invoke<string[][]>("groups"));
+    setGraphData(await invoke<GraphData>("graph"));
+  };
 
   return (
     <div className={styles.wrapper}>

@@ -1,6 +1,6 @@
 .wrapper {
-  width: 800px;
-  height: 600px;
+  width: 90vw;
+  height: 70vh;
 }
 
 .node {
@@ -10,14 +10,24 @@
   width: 64px;
   height: 64px;
   padding: 0;
+  border: 2px solid var(--group-color);
+  background-color: color-mix(in srgb, var(--group-color) 30%, #18181b);
   border-radius: 50%;
   color: #fff;
   font-size: 16px;
   font-weight: 700;
-  background-color: #399;;
+
+  :global(.react-flow__handle) {
+    top: 50%;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
-.edge :global(.react-flow__edge-path) {
-  stroke: #ddd;
-  stroke-width: 2;
+.edge {
+  :global(.react-flow__edge-path) {
+    stroke-width: 2;
+  }
 }

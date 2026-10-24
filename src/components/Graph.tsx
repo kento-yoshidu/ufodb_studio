@@ -1,6 +1,9 @@
 import "@xyflow/react/dist/style.css";
 import { Background, Controls, ReactFlow, type Edge, type Node } from "@xyflow/react";
 import { GraphData } from "../type";
+import { layoutForest } from "./LayoutForest";
+import { groupColor } from "ufodb-design-system";
+import { CSSProperties } from "react";
 import styles from "./graph.module.css";
 
 type Props = {
@@ -10,12 +13,18 @@ type Props = {
 export default function Graph({
   graph,
 }: Props) {
-  // 仮の配置: 10個ずつ横に並べて折り返す
-  const nodes: Node[] = graph.nodes.map((key, i) => ({
-    id: key,
-    position: { x: (i % 10) * 120, y: Math.floor(i / 10) * 100 },
-    data: { label: key },
+  const placed = layoutForest(graph);
+
+  const colorOf = new Map(
+    placed.map((p) => [p.key, groupColor(p.group)]),
+  );
+
+  const nodes: Node[] = layoutForest(graph).map((placed) => ({
+    id: placed.key,
+    position: { x: placed.x, y: placed.y },
+    data: { label: placed.key },
     className: styles.node,
+    style: { "--group-color": colorOf.get(placed.key) } as CSSProperties,
   }));
 
   const edges: Edge[] = graph.edges.map((edge) => ({
@@ -23,6 +32,8 @@ export default function Graph({
     source: edge.source,
     target: edge.target,
     className: styles.edge,
+    type: "straight",
+    style: { stroke: colorOf.get(edge.source) },
   }));
 
   return (
