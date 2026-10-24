@@ -4,12 +4,28 @@ import { Groups, Header, InsertKeyForm, MergeForm, SidePanel } from "ufodb-desig
 import styles from "./cotents.module.css";
 import SameForm from "./SameForm";
 
+type GraphData = {
+  nodes: string[];
+  edges: {
+    source: string;
+    target: string;
+  }[];
+};
+
 export default function Contents() {
+  const [mode, setMode] = useState<"row" | "graph">("row");
+
   async function handleInsertKey(key: string) {
     const res = await invoke("make_set", { key });
 
     setGroups(await invoke<string[][]>("groups"));
   }
+
+  const graph = async () => {
+    const res = await invoke<GraphData>("graph");
+
+    console.log("res = ", res);
+  };
 
   const handleMerge = async (keyA: string, keyB: string) => {
     const res = await invoke("unite", {
@@ -46,6 +62,7 @@ export default function Contents() {
 
   useEffect(() => {
     invoke<string[][]>("groups").then(setGroups);
+    graph();
   }, []);
 
   return (
@@ -73,15 +90,19 @@ export default function Contents() {
           />
         </SidePanel>
 
-        <div className={styles.right}>
-          <>
-            {groups.length === 0 ? (
-              <p className="groups__empty">まだグループがありません</p>
-            ) : (
-              <Groups groups={groups} />
-            )}
-          </>
-        </div>
+        {mode === "row" ? (
+          <div className={styles.right}>
+            <>
+              {groups.length === 0 ? (
+                <p className="groups__empty">まだグループがありません</p>
+              ) : (
+                <Groups groups={groups} />
+              )}
+            </>
+          </div>
+          ) : (
+            <p>graph</p>
+          )}
       </main>
     </div>
   );
