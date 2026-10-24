@@ -1,10 +1,22 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Groups, Header, InsertKeyForm, MergeForm, SidePanel } from "ufodb-design-system";
+import { Button, Groups, Header, InsertKeyForm, MergeForm, SidePanel } from "ufodb-design-system";
 import styles from "./cotents.module.css";
 import SameForm from "./SameForm";
+import { GraphData } from "../type";
+import Graph from "./Graph";
 
 export default function Contents() {
+  const [mode, setMode] = useState<"row" | "graph">("row");
+  const [graphData, setGraphData] = useState<GraphData>({
+    nodes: [],
+    edges: [],
+  });
+
+  const fetchGraph = async () => {
+    setGraphData(await invoke<GraphData>("graph"));
+  };
+
   async function handleInsertKey(key: string) {
     const res = await invoke("make_set", { key });
 
@@ -46,6 +58,7 @@ export default function Contents() {
 
   useEffect(() => {
     invoke<string[][]>("groups").then(setGroups);
+    invoke<GraphData>("graph").then(setGraphData);
   }, []);
 
   return (
@@ -74,13 +87,20 @@ export default function Contents() {
         </SidePanel>
 
         <div className={styles.right}>
-          <>
-            {groups.length === 0 ? (
+          <Button
+            text={mode === "row" ? "graph表示に切り替え" : "row表示に切り替え"}
+            onClick={() => setMode((m) => (m === "row" ? "graph" : "row"))}
+          />
+
+          {mode === "row" ? (
+            groups.length === 0 ? (
               <p className="groups__empty">まだグループがありません</p>
             ) : (
               <Groups groups={groups} />
-            )}
-          </>
+            )
+          ) : (
+            <Graph graph={graphData} />
+          )}
         </div>
       </main>
     </div>

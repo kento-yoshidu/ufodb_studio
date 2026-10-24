@@ -1,5 +1,17 @@
 use std::sync::Mutex;
 
+#[derive(Debug, serde::Serialize)]
+struct Edge {
+    source: String,
+    target: String,
+}
+
+#[derive(Debug, serde::Serialize)]
+struct GraphData {
+    nodes: Vec<String>,
+    edges: Vec<Edge>,
+}
+
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
@@ -47,6 +59,36 @@ fn groups(state: tauri::State<Mutex<ufodb_v0::Ufdb>>) -> Vec<Vec<String>> {
     groups
 }
 
+#[tauri::command]
+fn graph(state: tauri::State<Mutex<ufodb_v0::Ufdb>>) -> GraphData {
+    let mut ufdb = state.lock().unwrap();
+
+    let mut nodes: Vec<String> = ufdb.groups()
+        .into_values()
+        .flatten()
+        .cloned()
+        .collect();
+
+    nodes.sort();
+
+    let mut edges = Vec::new();
+
+    for key in nodes.iter() {
+        if let Some(neighbors) = ufdb.neighbors(key) {
+            for neighbor in neighbors {
+                if key < neighbor {
+                    edges.push(Edge {
+                        source: key.clone(),
+                        target: neighbor.clone(),
+                    });
+                }
+            }
+        }
+    }
+
+    GraphData { nodes, edges }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let data_dir = match ufodb_v0::storage::data_dir() {
@@ -63,8 +105,6 @@ pub fn run() {
         }
     };
 
-    println!("{:?}", ufdb);
-
     tauri::Builder::default()
         .manage(Mutex::new(ufdb))
         // .plugin(tauri_plugin_opener::init())
@@ -74,7 +114,8 @@ pub fn run() {
             make_set,
             unite,
             same,
-            groups])
+            groups,
+            graph])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
