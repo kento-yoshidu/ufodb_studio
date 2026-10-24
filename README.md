@@ -1,9 +1,13 @@
-# Tauri + React + Typescript
+# UFODB Studio
 
-<img src="src-tauri/icons/icon.svg" width="96" alt="UFO Studio icon" />
+## UI
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+### Rowモード
 
-## Recommended IDE Setup
+![](./docs/images/row.png)
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+### Graphモード
+
+UFODBは辺情報も保持しているので木を描画できる。
+
+![](./docs/images/graph.png)
