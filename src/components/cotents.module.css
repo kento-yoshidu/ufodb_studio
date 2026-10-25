@@ -1,12 +1,18 @@
 .wrapper {
+  display: flex;
+  flex-direction: column;
   height: 100vh;
 }
 
 .main {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  padding: 24px;
+  padding: 8px;
 
   .right {
-    padding: 24px;
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
   }
 }

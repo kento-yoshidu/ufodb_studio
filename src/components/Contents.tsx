@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Button, Groups, Header, InsertKeyForm, MergeForm, SidePanel } from "ufodb-design-system";
+import { Groups, Header, InsertKeyForm, MergeForm } from "ufodb-design-system";
 import styles from "./cotents.module.css";
+import menuStyles from "./menuPanel.module.css";
 import SameForm from "./SameForm";
 import { GraphData } from "../type";
 import Graph from "./Graph";
+import MenuPanel, { type Action, type Mode } from "./MenuPanel";
 
 export default function Contents() {
-  const [mode, setMode] = useState<"row" | "graph">("row");
+  const [mode, setMode] = useState<Mode>("row");
   const [graphData, setGraphData] = useState<GraphData>({
     nodes: [],
     edges: [],
@@ -29,22 +31,33 @@ export default function Contents() {
   };
 
   const handleSame = async (keyA: string, keyB: string) => {
-    const res = await invoke("same", {
+    const res = await invoke<boolean>("same", {
       keyA,
       keyB,
     });
 
-    window.alert(res);
+    setSameResult(res ? "同じグループです" : "違うグループです");
   }
 
   const [groups, setGroups] = useState<string[][]>([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [activeAction, setActiveAction] = useState<Action | null>(null);
+  const [sameResult, setSameResult] = useState<string | null>(null);
+
+  const selectAction = (action: Action | null) => {
+    setActiveAction(action);
+    setSameResult(null);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
         e.preventDefault();
-        setIsSidebarOpen((open) => !open);
+        setIsMenuOpen((open) => !open);
+      }
+
+      if (e.key === "Escape") {
+        setActiveAction(null);
       }
     };
 
@@ -65,37 +78,15 @@ export default function Contents() {
   return (
     <div className={styles.wrapper}>
       <Header
-        isSidebarOpen={isSidebarOpen}
-        onToggleSidebar={() => setIsSidebarOpen((open) => !open)}
+        isSidebarOpen={isMenuOpen}
+        onToggleSidebar={() => setIsMenuOpen((open) => !open)}
       />
 
       <main className={styles.main}>
-        <SidePanel
-          isOpen={isSidebarOpen}
-        >
-          <InsertKeyForm
-            onSubmit={handleInsertKey}
-          />
-
-          <MergeForm
-            options={groups}
-            onSubmit={handleMerge}
-          />
-
-          <SameForm
-            onSubmit={handleSame}
-          />
-        </SidePanel>
-
         <div className={styles.right}>
-          <Button
-            text={mode === "row" ? "graph表示に切り替え" : "row表示に切り替え"}
-            onClick={() => setMode((m) => (m === "row" ? "graph" : "row"))}
-          />
-
           {mode === "row" ? (
             groups.length === 0 ? (
-              <p className="groups__empty">まだグループがありません</p>
+              <p>まだグループがありません</p>
             ) : (
               <Groups groups={groups} />
             )
@@ -104,6 +95,38 @@ export default function Contents() {
           )}
         </div>
       </main>
+
+      {isMenuOpen && (
+        <MenuPanel
+          active={activeAction}
+          onSelect={selectAction}
+          mode={mode}
+          onChangeMode={setMode}
+        >
+          {activeAction === "insert" && (
+            <InsertKeyForm
+              onSubmit={handleInsertKey}
+            />
+          )}
+
+          {activeAction === "merge" && (
+            <MergeForm
+              options={groups}
+              onSubmit={handleMerge}
+            />
+          )}
+
+          {activeAction === "same" && (
+            <>
+              <SameForm
+                onSubmit={handleSame}
+              />
+
+              {sameResult && <p className={menuStyles.result}>{sameResult}</p>}
+            </>
+          )}
+        </MenuPanel>
+      )}
     </div>
   );
 }
