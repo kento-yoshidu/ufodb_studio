@@ -1,10 +1,10 @@
+import type { CSSProperties } from "react";
 import "@xyflow/react/dist/style.css";
 import { Background, Controls, ReactFlow, type Edge, type Node } from "@xyflow/react";
-import { GraphData } from "../type";
 import { layoutForest } from "./LayoutForest";
 import { groupColor } from "ufodb-design-system";
-import { CSSProperties } from "react";
 import styles from "./graph.module.css";
+import type { GraphData } from "../type";
 
 type Props = {
   graph: GraphData;
@@ -22,7 +22,13 @@ export default function Graph({
   const nodes: Node[] = layoutForest(graph).map((placed) => ({
     id: placed.key,
     position: { x: placed.x, y: placed.y },
-    data: { label: placed.key },
+    data: {
+      label: (
+        <span className={styles.label} title={placed.key}>
+          {placed.key}
+        </span>
+      ),
+    },
     className: styles.node,
     style: { "--group-color": colorOf.get(placed.key) } as CSSProperties,
   }));
@@ -40,7 +46,6 @@ export default function Graph({
     <div className={styles.wrapper}>
       <ReactFlow nodes={nodes} edges={edges} fitView>
         <Background />
-        <Controls />
       </ReactFlow>
     </div>
   );
