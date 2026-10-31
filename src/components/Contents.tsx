@@ -1,14 +1,23 @@
 import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
-import { Groups, Header, InsertKeyForm, MergeForm } from "ufodb-design-system";
+import {
+  Graph,
+  Groups,
+  Header,
+  InsertKeyForm,
+  MenuPanel,
+  MergeForm,
+  type Action,
+  type Mode,
+} from "ufodb-design-system";
 import styles from "./cotents.module.css";
-import menuStyles from "./menuPanel.module.css";
 import SameForm from "./SameForm";
 import { GraphData } from "../type";
-import Graph from "./Graph";
-import MenuPanel, { type Action, type Mode } from "./MenuPanel";
 
 export default function Contents() {
+  const queryClient = useQueryClient();
+
   const [mode, setMode] = useState<Mode>("row");
   const [graphData, setGraphData] = useState<GraphData>({
     nodes: [],
@@ -39,7 +48,6 @@ export default function Contents() {
     setSameResult(res ? "同じグループです" : "違うグループです");
   }
 
-  const [groups, setGroups] = useState<string[][]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [activeAction, setActiveAction] = useState<Action | null>(null);
   const [sameResult, setSameResult] = useState<string | null>(null);
@@ -65,13 +73,17 @@ export default function Contents() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const { data: groups = [], isLoading: isLoadingGroups } = useQuery({
+    queryKey: ["ufdb", "groups"],
+    queryFn: () => invoke<string[][]>("groups"),
+  });
+
   useEffect(() => {
-    invoke<string[][]>("groups").then(setGroups);
     invoke<GraphData>("graph").then(setGraphData);
   }, []);
 
   const refresh = async () => {
-    setGroups(await invoke<string[][]>("groups"));
+    await queryClient.invalidateQueries({ queryKey: ["ufdb", "groups"] });
     setGraphData(await invoke<GraphData>("graph"));
   };
 
@@ -81,6 +93,10 @@ export default function Contents() {
         isSidebarOpen={isMenuOpen}
         onToggleSidebar={() => setIsMenuOpen((open) => !open)}
       />
+
+      {isLoadingGroups && (
+        <p>loading...</p>
+      )}
 
       <main className={styles.main}>
         <div className={styles.right}>
@@ -122,7 +138,7 @@ export default function Contents() {
                 onSubmit={handleSame}
               />
 
-              {sameResult && <p className={menuStyles.result}>{sameResult}</p>}
+              {sameResult && <p>{sameResult}</p>}
             </>
           )}
         </MenuPanel>
